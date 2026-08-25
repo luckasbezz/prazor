@@ -1,0 +1,37 @@
+export function operationErrorMessage(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error);
+  const message = raw.toLowerCase();
+
+  if (message.includes("only managers")) return "Somente proprietários, administradores ou gerentes podem executar esta operação.";
+  if (message.includes("sku already exists") || message.includes("products_company_id_sku_key")) return "Este SKU já está sendo usado por outro produto.";
+  if (message.includes("barcode already exists") || message.includes("product_barcodes_company_id_barcode_key")) return "Este código de barras já está vinculado a outro produto.";
+  if (message.includes("invalid barcode")) return "Informe um código de barras válido, com pelo menos 4 caracteres.";
+  if (message.includes("expired inventory")) return "Não é possível receber um lote que já está vencido.";
+  if (message.includes("stock location access denied")) return "Você não tem acesso ao local de estoque selecionado.";
+  if (message.includes("source location access denied")) return "Você não tem acesso ao local de origem selecionado.";
+  if (message.includes("destination location access denied")) return "Você não tem acesso ao local de destino selecionado.";
+  if (message.includes("location access denied")) return "Você não tem acesso ao local de estoque selecionado.";
+  if (message.includes("insufficient stock")) return "O saldo disponível é menor que a quantidade informada.";
+  if (message.includes("active batch not found")) return "O lote selecionado não está mais disponível para movimentação.";
+  if (message.includes("invalid loss reason")) return "O motivo selecionado não está disponível nesta empresa.";
+  if (message.includes("override loss cost")) return "Somente gestores podem alterar o custo calculado da perda.";
+  if (message.includes("unit cost")) return "Informe um custo unitário válido.";
+  if (message.includes("two different locations")) return "A origem e o destino precisam ser locais diferentes.";
+  if (message.includes("inbound movement")) return "Selecione apenas o local de destino desta entrada.";
+  if (message.includes("outbound movement")) return "Selecione apenas o local de origem desta saída.";
+  if (message.includes("active product")) return "O produto selecionado não está disponível nesta empresa.";
+  if (message.includes("supplier does not belong")) return "O fornecedor selecionado não pertence a esta empresa.";
+  if (message.includes("batch supplier mismatch")) return "O lote não está vinculado ao fornecedor informado.";
+  if (message.includes("no current supplier agreement")) return "Este fornecedor não possui um acordo de troca vigente.";
+  if (message.includes("batch outside exchange deadline")) return "O prazo mínimo previsto no acordo já foi ultrapassado para este lote.";
+  if (message.includes("after exchange reservations")) return "Parte deste saldo já está reservada em outra troca. Atualize a quantidade e tente novamente.";
+  if (message.includes("protocol required")) return "Informe o protocolo fornecido pelo parceiro para enviar a solicitação.";
+  if (message.includes("invalid exchange protocol")) return "Informe um protocolo com até 120 caracteres.";
+  if (message.includes("invalid exchange status transition")) return "Esta mudança de etapa não é permitida no fluxo da troca.";
+  if (message.includes("exchange request not found")) return "A solicitação de troca não foi encontrada no seu acesso.";
+  if (message.includes("exchange notes too long")) return "As observações devem ter até 2.000 caracteres.";
+  if (message.includes("quantity")) return "Informe uma quantidade maior que zero.";
+  if (message.includes("cost price")) return "Informe um custo válido para o lote.";
+
+  return "Não foi possível concluir a operação. Revise os dados e tente novamente.";
+}
