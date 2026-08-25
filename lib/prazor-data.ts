@@ -1,4 +1,4 @@
-import { supabaseRest } from "./supabase/rest";
+import { supabaseRest, supabaseRpc } from "./supabase/rest";
 
 export type Membership = {
   company_id: string;
@@ -22,10 +22,23 @@ export type StockLocation = {
 };
 
 export async function getPrimaryMembership(userId: string, accessToken: string) {
-  const memberships = await supabaseRest<Membership[]>(
+  let memberships = await supabaseRest<Membership[]>(
     `company_members?select=company_id,role,status&user_id=eq.${encodeURIComponent(userId)}&status=eq.active&order=created_at.asc&limit=1`,
     accessToken,
   );
+  if (!memberships.length) {
+    const invited = await supabaseRest<Array<{ id: string }>>(
+      `company_members?select=id&user_id=eq.${encodeURIComponent(userId)}&status=eq.invited&limit=1`,
+      accessToken,
+    );
+    if (invited.length) {
+      await supabaseRpc<number>("activate_my_company_invitations", accessToken, {});
+      memberships = await supabaseRest<Membership[]>(
+        `company_members?select=company_id,role,status&user_id=eq.${encodeURIComponent(userId)}&status=eq.active&order=created_at.asc&limit=1`,
+        accessToken,
+      );
+    }
+  }
   const membership = memberships[0] ?? null;
 
   if (!membership) return null;

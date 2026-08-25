@@ -1,0 +1,1 @@
+drop index if exists public.company_members_user_status_company_idx;

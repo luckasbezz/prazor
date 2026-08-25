@@ -9834,3 +9834,202 @@ button {
   .report-recovery-card > div { grid-template-columns: 1fr auto; }
   .report-recovery-card > div small { grid-column: 1 / -1; grid-row: 2; }
 }
+
+/* Team, invitations and permissions module */
+.team-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 25px;
+}
+
+.team-metric-grid article {
+  position: relative;
+  min-height: 132px;
+  overflow: hidden;
+  border: 1px solid #e0e3dd;
+  border-radius: 15px;
+  padding: 19px;
+  background: #fff;
+  box-shadow: 0 7px 24px rgba(22, 30, 18, 0.035);
+}
+
+.team-metric-grid article > span { color: #707985; font-size: 10px; font-weight: 680; }
+.team-metric-grid article > strong { display: block; margin: 16px 0 5px; color: #28313a; font-size: 28px; letter-spacing: -0.04em; }
+.team-metric-grid article > small { color: #959ca5; font-size: 8px; }
+.team-metric-grid article > i { position: absolute; top: 18px; right: 18px; display: grid; width: 28px; height: 28px; place-items: center; border-radius: 8px; font-size: 9px; font-style: normal; font-weight: 820; }
+.team-metric-grid i.active { color: #597812; background: #eaf4d6; }
+.team-metric-grid i.pending { color: #9c6427; background: #fff0df; }
+.team-metric-grid i.leaders { color: #6855aa; background: #eeeafd; }
+.team-metric-grid i.scoped { color: #4c6d98; background: #e9f0f8; }
+
+.team-workspace { margin-top: 15px; }
+.team-view-tabs { display: flex; gap: 6px; border-bottom: 1px solid #dfe3dc; padding: 0 3px; }
+.team-view-tabs button { position: relative; min-height: 42px; padding: 0 13px; cursor: pointer; color: #7f8790; background: transparent; font-size: 10px; font-weight: 750; }
+.team-view-tabs button::after { position: absolute; right: 8px; bottom: -1px; left: 8px; height: 2px; border-radius: 999px; content: ""; background: transparent; }
+.team-view-tabs button.active { color: #384626; }
+.team-view-tabs button.active::after { background: #9fc52a; }
+.team-view-tabs button b { margin-left: 5px; border-radius: 999px; padding: 2px 6px; color: #566b17; background: #eaf2d8; font-size: 7px; }
+
+.team-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.58fr); gap: 15px; margin-top: 15px; }
+.team-main-column, .team-side-column { min-width: 0; }
+.team-side-column { display: grid; align-content: start; gap: 15px; }
+.team-toolbar { display: grid; grid-template-columns: minmax(210px, 1fr) 145px 155px auto; gap: 9px; border: 1px solid #e0e3dd; border-radius: 14px 14px 0 0; padding: 13px; background: #fff; }
+.team-search { position: relative; }
+.team-search > span { position: absolute; top: 50%; left: 11px; color: #929aa3; font-size: 14px; transform: translateY(-50%); }
+.team-search input, .team-toolbar select, .team-form-card input, .team-form-card select { width: 100%; height: 39px; border: 1px solid #dfe3dc; border-radius: 9px; padding: 0 11px; color: #343d46; background: #fafbf9; font-size: 9px; }
+.team-search input { padding-left: 33px; }
+.team-toolbar select { padding-right: 28px; }
+.team-search input:focus, .team-toolbar select:focus, .team-form-card input:focus, .team-form-card select:focus { border-color: #b7cc73; box-shadow: 0 0 0 3px rgba(165, 196, 69, 0.13); outline: none; }
+.team-invite-button { height: 39px; border-radius: 9px; padding: 0 13px; cursor: pointer; color: #232c11; background: var(--lime); font-size: 9px; font-weight: 820; white-space: nowrap; }
+.team-read-only { display: grid; height: 39px; place-items: center; border-radius: 9px; color: #818a93; background: #f0f2ee; font-size: 8px; font-weight: 740; }
+
+.team-table-card { overflow: hidden; border: 1px solid #e0e3dd; border-top: 0; border-radius: 0 0 14px 14px; background: #fff; box-shadow: 0 7px 24px rgba(22, 30, 18, 0.03); }
+.team-table-header, .team-table-row { display: grid; grid-template-columns: minmax(210px, 1.15fr) minmax(145px, .75fr) minmax(135px, .7fr) 110px 65px; align-items: center; gap: 10px; }
+.team-table-header { padding: 11px 15px; color: #9ba2aa; background: #fafbf8; font-size: 7px; font-weight: 790; letter-spacing: .05em; text-transform: uppercase; }
+.team-table-row { min-height: 78px; border-top: 1px solid #edf0eb; padding: 11px 15px; color: #59626c; font-size: 9px; }
+.team-person { display: flex; min-width: 0; align-items: center; gap: 10px; }
+.team-person > i { display: grid; width: 35px; height: 35px; flex: 0 0 auto; place-items: center; border-radius: 10px; color: #4d6412; background: #eaf3d7; font-size: 9px; font-style: normal; font-weight: 820; }
+.team-person > span, .team-role > span, .team-scope { display: grid; min-width: 0; gap: 3px; }
+.team-person strong, .team-person small, .team-scope strong, .team-scope small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team-person strong { color: #343d46; font-size: 9px; }
+.team-person strong em { margin-left: 6px; border-radius: 999px; padding: 2px 5px; color: #657b17; background: #eff5df; font-size: 6px; font-style: normal; }
+.team-person small, .team-role small, .team-scope small { color: #9aa1a9; font-size: 7px; }
+.team-role { display: flex; align-items: center; gap: 8px; }
+.team-role > i { display: grid; width: 27px; height: 27px; flex: 0 0 auto; place-items: center; border-radius: 8px; font-size: 8px; font-style: normal; }
+.team-role strong, .team-scope strong { color: #46505a; font-size: 8px; }
+.team-role-owner > i { color: #765ea8; background: #eee9fa; }
+.team-role-admin > i { color: #536d9c; background: #e9eff8; }
+.team-role-manager > i { color: #6c821b; background: #edf3df; }
+.team-role-staff > i { color: #7d8791; background: #eff1ee; }
+.team-status { display: inline-flex; justify-self: start; align-items: center; gap: 5px; border-radius: 999px; padding: 5px 8px; font-size: 7px; font-weight: 760; }
+.team-status i { width: 5px; height: 5px; border-radius: 50%; }
+.team-status.active { color: #58740f; background: #eaf4d5; }
+.team-status.active i { background: #7da61a; }
+.team-status.invited { color: #986126; background: #fff0df; }
+.team-status.invited i { background: #e2923f; }
+.team-status.suspended { color: #9d4a3d; background: #fae9e5; }
+.team-status.suspended i { background: #d4624f; }
+.team-edit-button { justify-self: end; cursor: pointer; color: #687c14; background: transparent; font-size: 8px; font-weight: 790; }
+.team-edit-button:disabled { cursor: not-allowed; color: #afb4b9; }
+.team-empty { display: grid; min-height: 300px; place-items: center; align-content: center; padding: 30px; text-align: center; }
+.team-empty > span { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 11px; color: #647a19; background: #eef4df; font-size: 15px; }
+.team-empty h3 { margin: 13px 0 5px; font-size: 13px; }
+.team-empty p { margin: 0; color: #929aa3; font-size: 9px; }
+
+.team-form-card, .team-guidance-card, .team-activity-card, .permission-card, .permission-note { border: 1px solid #e0e3dd; border-radius: 14px; padding: 19px; background: #fff; box-shadow: 0 7px 24px rgba(22, 30, 18, 0.03); }
+.team-side-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.team-side-heading > div > span, .team-activity-card > div > span { color: #84991f; font-size: 7px; font-weight: 820; letter-spacing: .08em; text-transform: uppercase; }
+.team-side-heading h2, .team-activity-card h2 { margin: 4px 0 3px; font-size: 15px; letter-spacing: -.02em; }
+.team-side-heading p { overflow: hidden; max-width: 240px; margin: 0; color: #9098a1; font-size: 8px; line-height: 1.45; text-overflow: ellipsis; }
+.team-side-heading > button { display: grid; width: 26px; height: 26px; flex: 0 0 auto; place-items: center; cursor: pointer; border-radius: 7px; color: #87909a; background: #f0f2ee; font-size: 14px; }
+.team-form-card { display: grid; gap: 14px; }
+.team-form-card > label { display: grid; gap: 6px; color: #505963; font-size: 8px; font-weight: 760; }
+.team-form-card > label > small { color: #929aa3; font-size: 7px; font-weight: 500; line-height: 1.45; }
+.team-branch-selector { border: 0; padding: 0; }
+.team-branch-selector legend { margin-bottom: 7px; color: #505963; font-size: 8px; font-weight: 760; }
+.team-branch-selector > div { display: grid; max-height: 150px; overflow-y: auto; gap: 5px; }
+.team-branch-selector label { cursor: pointer; }
+.team-branch-selector input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.team-branch-selector label > span { display: flex; align-items: center; gap: 8px; border: 1px solid #e1e5de; border-radius: 8px; padding: 8px; color: #59626c; background: #fafbf9; font-size: 8px; }
+.team-branch-selector label i { display: grid; width: 17px; height: 17px; place-items: center; border: 1px solid #d6dcd1; border-radius: 5px; color: transparent; font-size: 7px; font-style: normal; }
+.team-branch-selector input:checked + span { border-color: #bfd27e; color: #4d6119; background: #f5f9ea; }
+.team-branch-selector input:checked + span i { border-color: #96b339; color: #43570e; background: #c6f43d; }
+.team-branch-selector > p { margin: 0; border-radius: 8px; padding: 10px; color: #8e969f; background: #f3f5f1; font-size: 7px; line-height: 1.5; }
+.team-branch-selector > small { display: block; margin-top: 6px; color: #a0a6ad; font-size: 6px; line-height: 1.4; }
+.team-full-access-note { display: flex; align-items: center; gap: 9px; border: 1px solid #dce9ba; border-radius: 9px; padding: 10px; background: #f5f9e9; }
+.team-full-access-note > span { display: grid; width: 27px; height: 27px; place-items: center; border-radius: 8px; color: #5f7814; background: #e5f0ca; font-size: 10px; }
+.team-full-access-note > div { display: grid; gap: 2px; }
+.team-full-access-note strong { color: #4b5e1e; font-size: 8px; }
+.team-full-access-note small { color: #80905a; font-size: 6px; }
+.team-feedback { margin: 0; border-radius: 8px; padding: 9px; font-size: 7px; line-height: 1.45; }
+.team-feedback.error { color: #9d4739; background: #fbeae6; }
+.team-feedback.success { color: #567211; background: #ebf4d8; }
+.team-form-actions { display: flex; justify-content: flex-end; gap: 7px; }
+.team-form-actions button { min-height: 36px; }
+.team-remove-button { justify-self: start; cursor: pointer; color: #b55343; background: transparent; font-size: 7px; font-weight: 770; }
+
+.team-guidance-card { color: #fff; border-color: #202a35; background: radial-gradient(circle at 105% -5%, rgba(198, 244, 61, .15), transparent 39%), #111923; }
+.team-guidance-card h2 { margin: 0 0 7px; font-size: 19px; line-height: 1.17; letter-spacing: -.035em; }
+.team-guidance-card > p { margin: 0; color: #9da8b2; font-size: 8px; line-height: 1.55; }
+.team-guidance-card > div { display: grid; gap: 10px; margin-top: 18px; }
+.team-guidance-card > div > span { display: grid; grid-template-columns: 28px 1fr; align-items: center; gap: 8px; }
+.team-guidance-card b { display: grid; width: 27px; height: 27px; place-items: center; border-radius: 8px; color: #718a25; background: #263122; font-size: 7px; }
+.team-guidance-card i { display: grid; gap: 2px; font-style: normal; }
+.team-guidance-card i strong { color: #e0e5dc; font-size: 8px; }
+.team-guidance-card i small { color: #7f8a95; font-size: 6px; }
+
+.team-activity-card > div { margin-bottom: 12px; }
+.team-activity-list { display: grid; }
+.team-activity-list > div { position: relative; display: grid; grid-template-columns: 27px minmax(0, 1fr); gap: 9px; padding: 8px 0; }
+.team-activity-list > div:not(:last-child)::before { position: absolute; top: 34px; bottom: -2px; left: 13px; width: 1px; content: ""; background: #e5e8e1; }
+.team-activity-list > div > i { position: relative; z-index: 1; display: grid; width: 27px; height: 27px; place-items: center; border-radius: 8px; color: #5a7515; background: #eaf3d7; font-size: 7px; font-style: normal; }
+.team-activity-list > div > span { display: grid; min-width: 0; gap: 2px; }
+.team-activity-list strong, .team-activity-list p, .team-activity-list small { overflow: hidden; margin: 0; text-overflow: ellipsis; white-space: nowrap; }
+.team-activity-list strong { color: #3f4851; font-size: 8px; }
+.team-activity-list p { color: #737c86; font-size: 7px; }
+.team-activity-list small { color: #9aa1a9; font-size: 6px; }
+.team-activity-empty { margin: 0; border-radius: 8px; padding: 11px; color: #8c949d; background: #f3f5f1; font-size: 7px; line-height: 1.5; }
+
+.permission-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, .5fr); gap: 15px; margin-top: 15px; }
+.team-role-chip { border-radius: 999px; padding: 6px 9px; color: #5c711b; background: #edf4dc; font-size: 7px; font-weight: 770; }
+.permission-table { margin-top: 20px; overflow-x: auto; }
+.permission-header, .permission-row { display: grid; min-width: 650px; grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(85px, .5fr)); align-items: center; }
+.permission-header { padding: 0 8px 9px; color: #9aa1a9; font-size: 7px; font-weight: 770; text-align: center; }
+.permission-header span:first-child { text-align: left; }
+.permission-row { min-height: 48px; border-top: 1px solid #edf0eb; padding: 6px 8px; }
+.permission-row strong { color: #48515b; font-size: 8px; }
+.permission-row span { justify-self: center; font-size: 10px; font-weight: 830; }
+.permission-row span.allowed { display: grid; width: 23px; height: 23px; place-items: center; border-radius: 7px; color: #587313; background: #eaf4d6; }
+.permission-row span.denied { color: #c0c5ca; }
+.permission-note { color: #fff; border-color: #202a35; background: #111923; }
+.permission-note > span { color: var(--lime); font-size: 7px; font-weight: 820; letter-spacing: .08em; text-transform: uppercase; }
+.permission-note h2 { margin: 15px 0 9px; font-size: 20px; line-height: 1.16; }
+.permission-note p { color: #9ba6b1; font-size: 8px; line-height: 1.6; }
+.permission-note ul { display: grid; gap: 9px; margin: 18px 0 0; padding: 0; list-style: none; color: #d8ded4; font-size: 8px; }
+
+.invite-shell .auth-card { min-height: 100%; align-content: center; }
+.invite-aside { background: radial-gradient(circle at 10% 100%, rgba(198,244,61,.17), transparent 37%), #101923; }
+.invite-loading { display: grid; min-height: 170px; place-items: center; align-content: center; gap: 10px; color: #707983; font-size: 10px; }
+.invite-loading span { width: 26px; height: 26px; border: 3px solid #e0e5da; border-top-color: #8eae2e; border-radius: 50%; animation: invite-spin .8s linear infinite; }
+.invite-invalid { display: grid; place-items: center; padding: 24px 0; text-align: center; }
+.invite-invalid > span { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 12px; color: #a34a3c; background: #fae8e4; font-size: 15px; font-weight: 820; }
+.invite-invalid h2 { margin: 15px 0 6px; font-size: 18px; }
+.invite-invalid p { max-width: 390px; margin: 0 0 17px; color: #858e98; font-size: 10px; line-height: 1.55; }
+.invite-invalid a { display: inline-flex; }
+@keyframes invite-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 1180px) {
+  .team-layout { grid-template-columns: 1fr; }
+  .team-side-column { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .team-form-card { grid-column: 1 / -1; }
+  .team-toolbar { grid-template-columns: minmax(200px, 1fr) 150px 160px; }
+  .team-invite-button, .team-read-only { grid-column: 2 / -1; }
+}
+
+@media (max-width: 1040px) {
+  .team-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .team-table-header { display: none; }
+  .team-table-row { grid-template-columns: minmax(210px, 1.2fr) minmax(135px, .8fr) minmax(120px, .7fr) auto; align-items: start; }
+  .team-edit-button { grid-column: 1 / -1; justify-self: start; }
+  .permission-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  .team-heading { align-items: flex-start; }
+  .team-toolbar { grid-template-columns: 1fr; }
+  .team-invite-button, .team-read-only { grid-column: auto; }
+  .team-table-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .team-role, .team-scope { grid-column: 1 / -1; }
+  .team-status { grid-column: 2; grid-row: 1; }
+  .team-side-column { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+  .team-metric-grid { grid-template-columns: 1fr; }
+  .team-view-tabs { overflow-x: auto; }
+  .team-table-row, .team-toolbar { padding-inline: 12px; }
+  .team-form-card, .team-guidance-card, .team-activity-card, .permission-card, .permission-note { padding: 16px; }
+  .team-form-actions { flex-direction: column-reverse; }
+  .team-form-actions button { width: 100%; }
+}

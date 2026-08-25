@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 type AppFrameProps = {
-  active: "dashboard" | "expiry" | "notifications" | "products" | "receive" | "movements" | "losses" | "suppliers" | "exchanges" | "reports";
+  active: "dashboard" | "expiry" | "notifications" | "products" | "receive" | "movements" | "losses" | "suppliers" | "exchanges" | "reports" | "team";
   companyName: string;
   userLabel: string;
   notificationCount?: number;
@@ -21,6 +21,7 @@ const navItems = [
   { id: "suppliers", href: "/app/fornecedores", icon: "↔", label: "Fornecedores" },
   { id: "exchanges", href: "/app/fornecedores/trocas", icon: "⇄", label: "Trocas" },
   { id: "reports", href: "/app/relatorios", icon: "▦", label: "Relatórios" },
+  { id: "team", href: "/app/equipe", icon: "◎", label: "Equipe" },
 ] as const;
 
 export function AppFrame({
