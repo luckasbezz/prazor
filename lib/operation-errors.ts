@@ -40,6 +40,15 @@ export function operationErrorMessage(error: unknown) {
   if (message.includes("exchange resolution notes too long")) return "As observações da conclusão devem ter até 2.000 caracteres.";
   if (message.includes("exchange request not found")) return "A solicitação de troca não foi encontrada no seu acesso.";
   if (message.includes("exchange notes too long")) return "As observações devem ter até 2.000 caracteres.";
+  if (message.includes("same sku has conflicting")) return "O mesmo SKU aparece com informações diferentes na planilha. Corrija as linhas e analise novamente.";
+  if (message.includes("same lot and location")) return "O mesmo lote e local aparecem mais de uma vez na planilha.";
+  if (message.includes("import is already being processed")) return "Esta planilha já está sendo processada. Aguarde antes de tentar novamente.";
+  if (message.includes("branch not found")) return "Uma filial da planilha não foi encontrada ou não está ativa.";
+  if (message.includes("supplier not found")) return "Um fornecedor da planilha não foi encontrado ou não está ativo.";
+  if (message.includes("barcode belongs to another")) return "Um código de barras da planilha já pertence a outro produto.";
+  if (message.includes("inactive product")) return "Um SKU da planilha pertence a um produto inativo.";
+  if (message.includes("invalid expiration date")) return "Revise as datas de validade da planilha.";
+  if (message.includes("invalid data at row") || message.includes("at row")) return "Os dados mudaram depois da prévia. Analise a planilha novamente antes de confirmar.";
   if (message.includes("quantity")) return "Informe uma quantidade maior que zero.";
   if (message.includes("cost price")) return "Informe um custo válido para o lote.";
 

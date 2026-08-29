@@ -38,7 +38,7 @@ Cada item só está concluído quando funciona no celular e desktop, respeita RL
 
 ### Épico B — catálogo e dados
 
-**Progresso em 21/08/2026:** CAT-01 e CAT-02 já possuem a primeira versão funcional, incluindo cadastro transacional com SKU, código de barras, unidade e preços. Categorias, marcas, edição e importação permanecem para os próximos ciclos.
+**Progresso em 29/08/2026:** CAT-01, CAT-02, IMP-01 e IMP-02 possuem a primeira versão funcional. Além do cadastro manual, a central aceita CSV e XLSX, reconhece colunas equivalentes, valida até 500 linhas por campo, permite baixar os erros, oferece modelo com instruções e confirma produtos, lotes, movimentos e saldos em uma transação idempotente. Categorias, marcas e a edição completa do catálogo permanecem para os próximos ciclos.
 
 | ID | História | Prioridade | Critérios de aceite |
 |---|---|---:|---|

@@ -35,7 +35,7 @@ export default async function ProductsPage() {
       <div className="app-page operation-page">
         <div className="app-heading-row">
           <div><span>Estoque / Produtos</span><h1>Catálogo de produtos</h1><p>Cadastre os itens que serão controlados por lote e validade.</p></div>
-          <div className="app-primary-actions"><Link className="secondary-action link-action" href="/app">← Voltar ao painel</Link><Link className="primary-action link-action" href="/app/estoque/receber">Receber estoque</Link></div>
+          <div className="app-primary-actions"><Link className="secondary-action link-action" href="/app/importacoes">Importar planilha</Link><Link className="secondary-action link-action" href="/app">← Voltar ao painel</Link><Link className="primary-action link-action" href="/app/estoque/receber">Receber estoque</Link></div>
         </div>
 
         <section className="catalog-layout">

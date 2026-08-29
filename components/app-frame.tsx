@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 type AppFrameProps = {
-  active: "dashboard" | "expiry" | "notifications" | "products" | "receive" | "movements" | "losses" | "suppliers" | "exchanges" | "reports" | "team";
+  active: "dashboard" | "expiry" | "notifications" | "products" | "imports" | "receive" | "movements" | "losses" | "suppliers" | "exchanges" | "reports" | "team";
   companyName: string;
   userLabel: string;
   notificationCount?: number;
@@ -15,6 +15,7 @@ const navItems = [
   { id: "expiry", href: "/app/validades", icon: "◷", label: "Validades" },
   { id: "notifications", href: "/app/notificacoes", icon: "◇", label: "Notificações" },
   { id: "products", href: "/app/estoque/produtos", icon: "□", label: "Produtos" },
+  { id: "imports", href: "/app/importacoes", icon: "⇧", label: "Importações" },
   { id: "receive", href: "/app/estoque/receber", icon: "＋", label: "Receber estoque" },
   { id: "movements", href: "/app/estoque/movimentar", icon: "↔", label: "Movimentações" },
   { id: "losses", href: "/app/estoque/perdas", icon: "!", label: "Perdas e avarias" },

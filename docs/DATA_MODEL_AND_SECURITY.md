@@ -161,6 +161,7 @@ As conclusões de troca são imutáveis e passam exclusivamente por `complete_ex
 - as operações `create_product_with_barcode` e `receive_inventory_lot` foram adicionadas como pontos transacionais controlados: negam acesso anônimo, exigem papel de gestão, validam todas as relações pela empresa e mantêm `search_path` vazio.
 - a interface de movimentações passou a usar exclusivamente `post_inventory_movement`: a empresa é derivada da sessão no servidor, perdas e trocas continuam bloqueadas nesse ponto genérico, ajustes exigem papel de gestão, origem/destino respeitam o escopo e o núcleo transacional impede saldo negativo.
 - o fluxo de perdas usa exclusivamente `record_loss`: a empresa é derivada da sessão, motivo e local são validados, o custo é congelado, sobrescritas exigem papel de gestão e saldo, movimento, prejuízo e auditoria são gravados na mesma transação. Motivos padrão são criados automaticamente para empresas novas e foram preparados para empresas existentes.
+- a operação `import_catalog_inventory` valida autenticação, papel, empresa, filiais, locais, fornecedores, produtos, códigos, datas, quantidades e custos antes de gravar. A confirmação inteira ocorre em uma única transação, usa hash canônico e bloqueio transacional para impedir lançamentos duplicados e mantém as tabelas de importação sem escrita direta pelo cliente.
 
 ### Performance
 
