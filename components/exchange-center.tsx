@@ -62,6 +62,17 @@ export type ExchangeRequestItem = {
   quantity: number;
   unitValue: number;
   totalValue: number;
+  resolution: {
+    outcome: "replacement" | "credit" | "mixed";
+    acceptedQuantity: number;
+    rejectedQuantity: number;
+    replacementQuantity: number;
+    replacementUnitValue: number;
+    creditAmount: number;
+    recoveredValue: number;
+    notes: string | null;
+    createdAt: string;
+  } | null;
 };
 
 export type ExchangeActivityItem = { id: string; title: string; detail: string; createdAt: string; actorLabel: string };
@@ -103,6 +114,7 @@ export function ExchangeCenter({ candidates, requests, activities, canManage, ca
   const availableValue = monitoredEligible.reduce((sum, item) => sum + item.candidate.availableQuantity * item.candidate.unitValue, 0);
   const openRequests = requests.filter((item) => !["rejected", "completed", "cancelled"].includes(item.status));
   const reservedValue = openRequests.reduce((sum, item) => sum + item.totalValue, 0);
+  const recoveredValue = requests.reduce((sum, item) => sum + (item.resolution?.recoveredValue ?? 0), 0);
   const filteredCandidates = useMemo(() => evaluatedCandidates
     .filter((item) => candidateFilter === "all" || (candidateFilter === "eligible" ? item.state === "eligible" : item.state !== "eligible"))
     .filter((item) => !deferredQuery || candidateSearchText(item.candidate).includes(deferredQuery))
@@ -138,7 +150,7 @@ export function ExchangeCenter({ candidates, requests, activities, canManage, ca
         <article className="exchange-metric exchange-metric-ready"><span>Oportunidades elegíveis</span><strong>{monitoredEligible.length}</strong><small>Nos próximos {monitoringDays} dias</small><i>✓</i></article>
         <article className="exchange-metric exchange-metric-value"><span>Valor recuperável</span><strong>{money.format(availableValue)}</strong><small>Saldo elegível ainda disponível</small><i>R$</i></article>
         <article className="exchange-metric exchange-metric-open"><span>Trocas em andamento</span><strong>{openRequests.length}</strong><small>{money.format(reservedValue)} sob acompanhamento</small><i>⇄</i></article>
-        <article className="exchange-metric exchange-metric-done"><span>Concluídas</span><strong>{requests.filter((item) => item.status === "completed").length}</strong><small>Histórico preservado por lote</small><i>↗</i></article>
+        <article className="exchange-metric exchange-metric-done"><span>Valor recuperado</span><strong>{money.format(recoveredValue)}</strong><small>{requests.filter((item) => item.status === "completed").length} trocas concluídas</small><i>↗</i></article>
       </section>
 
       <section className="exchange-workspace">
@@ -211,11 +223,11 @@ function RequestList({ items, canManage, onUpdate }: { items: ExchangeRequestIte
     <div className="exchange-request-list">
       {items.map((item) => (
         <article className="exchange-request-card" key={item.id}>
-          <header><div><span className={`exchange-request-status ${item.status}`}>{requestStatusLabel(item.status)}</span><small>TRC-{item.id.slice(0, 8).toUpperCase()}</small></div><strong>{money.format(item.totalValue)}</strong></header>
+          <header><div><span className={`exchange-request-status ${item.status}`}>{requestStatusLabel(item.status)}</span><small>TRC-{item.id.slice(0, 8).toUpperCase()}</small></div><strong>{money.format(item.resolution?.recoveredValue ?? item.totalValue)}</strong></header>
           <div className="exchange-request-title"><div className="exchange-product-icon" aria-hidden="true">□</div><div><h3>{item.productName}</h3><p>{item.sku ?? "Sem SKU"} · {item.batchCode ? `Lote ${item.batchCode}` : "Lote sem código"}</p></div></div>
-          <dl><div><dt>Fornecedor</dt><dd>{item.supplierName}</dd></div><div><dt>Quantidade</dt><dd>{quantityFormat.format(item.quantity)} {item.unit}</dd></div><div><dt>Origem</dt><dd>{item.locationName}</dd></div><div><dt>Protocolo</dt><dd>{item.protocol ?? "Ainda não informado"}</dd></div></dl>
-          <div className="exchange-request-timeline"><span className="done">Preparada</span><i /><span className={["requested", "accepted", "collected", "sent", "completed"].includes(item.status) ? "done" : ""}>Enviada</span><i /><span className={["accepted", "collected", "sent", "completed"].includes(item.status) ? "done" : ""}>Aceita</span><i /><span className={["collected", "sent", "completed"].includes(item.status) ? "done" : ""}>Em trânsito</span></div>
-          <footer><small>Criada em {formatDateTime(item.createdAt)} · {item.branchName}</small>{canManage && nextStatuses(item.status).length ? <button onClick={() => onUpdate(item)} type="button">Atualizar andamento →</button> : null}</footer>
+          <dl><div><dt>Fornecedor</dt><dd>{item.supplierName}</dd></div><div><dt>{item.resolution ? "Aceito" : "Quantidade"}</dt><dd>{quantityFormat.format(item.resolution?.acceptedQuantity ?? item.quantity)} {item.unit}</dd></div><div><dt>{item.resolution ? "Compensação" : "Origem"}</dt><dd>{item.resolution ? resolutionOutcomeLabel(item.resolution.outcome) : item.locationName}</dd></div><div><dt>{item.resolution ? "Não aceito" : "Protocolo"}</dt><dd>{item.resolution ? `${quantityFormat.format(item.resolution.rejectedQuantity)} ${item.unit}` : item.protocol ?? "Ainda não informado"}</dd></div></dl>
+          <div className="exchange-request-timeline"><span className="done">Preparada</span><i /><span className={["requested", "accepted", "collected", "sent", "completed"].includes(item.status) ? "done" : ""}>Enviada</span><i /><span className={["accepted", "collected", "sent", "completed"].includes(item.status) ? "done" : ""}>Aceita</span><i /><span className={["collected", "sent", "completed"].includes(item.status) ? "done" : ""}>{item.status === "completed" ? "Concluída" : "Em trânsito"}</span></div>
+          <footer><small>{item.resolution ? `Concluída em ${formatDateTime(item.resolution.createdAt)}` : `Criada em ${formatDateTime(item.createdAt)}`} · {item.branchName}</small>{canManage && (nextStatuses(item.status).length || canComplete(item.status)) ? <button onClick={() => onUpdate(item)} type="button">{canComplete(item.status) ? "Registrar resultado →" : "Atualizar andamento →"}</button> : null}</footer>
         </article>
       ))}
     </div>
@@ -280,24 +292,53 @@ function ExchangeRequestPanel({ candidate, onClose, today }: { candidate: Exchan
 
 function RequestStatusPanel({ item, onClose }: { item: ExchangeRequestItem; onClose: () => void }) {
   const options = nextStatuses(item.status);
+  const completionAvailable = canComplete(item.status);
+  const agreementOutcome = agreementOutcomeFromSnapshot(item.agreementSnapshot);
+  const outcomeOptions = resolutionOutcomeOptions(agreementOutcome);
+  const [mode, setMode] = useState<"progress" | "completion">(item.status === "sent" || !options.length ? "completion" : "progress");
   const [status, setStatus] = useState(options[0]?.value ?? "");
   const [protocol, setProtocol] = useState(item.protocol ?? "");
+  const [outcome, setOutcome] = useState<"replacement" | "credit" | "mixed">(outcomeOptions[0]?.value ?? "replacement");
+  const [acceptedQuantity, setAcceptedQuantity] = useState(String(item.quantity));
+  const [replacementQuantity, setReplacementQuantity] = useState(String(item.quantity));
+  const [replacementUnitValue, setReplacementUnitValue] = useState(String(item.unitValue));
+  const [creditAmount, setCreditAmount] = useState(String(item.totalValue));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const accepted = parseQuantity(acceptedQuantity) ?? 0;
+  const rejected = Math.max(0, item.quantity - accepted);
+  const replacement = outcome === "replacement" || outcome === "mixed" ? parseNonNegativeNumber(replacementQuantity) ?? 0 : 0;
+  const replacementValue = outcome === "replacement" || outcome === "mixed" ? parseNonNegativeNumber(replacementUnitValue) ?? 0 : 0;
+  const credit = outcome === "credit" || outcome === "mixed" ? parseNonNegativeNumber(creditAmount) ?? 0 : 0;
+  const recovered = replacement * replacementValue + credit;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const response = await fetch("/api/exchange-requests", {
-        method: "PATCH",
+      const completing = mode === "completion";
+      if (completing && (accepted <= 0 || accepted > item.quantity)) {
+        setError(`A quantidade aceita deve ficar entre 0 e ${quantityFormat.format(item.quantity)} ${item.unit}.`);
+        setLoading(false);
+        return;
+      }
+      const response = await fetch(completing ? "/api/exchange-requests/complete" : "/api/exchange-requests", {
+        method: completing ? "POST" : "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: item.id, status, protocol }),
+        body: JSON.stringify(completing ? {
+          id: item.id,
+          outcome,
+          acceptedQuantity: accepted,
+          replacementQuantity: replacement,
+          replacementUnitValue: replacementValue,
+          creditAmount: credit,
+          notes: new FormData(event.currentTarget).get("resolutionNotes"),
+        } : { id: item.id, status, protocol }),
       });
       const data = (await response.json()) as { error?: string; next?: string };
       if (!response.ok || data.error) {
-        setError(data.error ?? "Não foi possível atualizar a troca.");
+        setError(data.error ?? (completing ? "Não foi possível concluir a troca." : "Não foi possível atualizar a troca."));
         return;
       }
       window.location.assign(data.next ?? "/app/fornecedores/trocas?visao=solicitacoes");
@@ -313,13 +354,31 @@ function RequestStatusPanel({ item, onClose }: { item: ExchangeRequestItem; onCl
       <form className="exchange-side-panel exchange-status-panel" onSubmit={submit}>
         <header><div><span>Atualizar andamento</span><h2>TRC-{item.id.slice(0, 8).toUpperCase()}</h2><p>{item.productName} · {item.supplierName}</p></div><button aria-label="Fechar atualização" onClick={onClose} type="button">×</button></header>
         <section className="exchange-current-status"><span>Etapa atual</span><strong className={`exchange-request-status ${item.status}`}>{requestStatusLabel(item.status)}</strong><small>{item.protocol ? `Protocolo ${item.protocol}` : "Aguardando protocolo"}</small></section>
-        <div className="exchange-status-options" role="radiogroup" aria-label="Próxima etapa">
-          {options.map((option) => <label className={status === option.value ? "selected" : ""} key={option.value}><input checked={status === option.value} name="status" onChange={() => setStatus(option.value)} type="radio" value={option.value} /><span><strong>{option.label}</strong><small>{option.copy}</small></span></label>)}
-        </div>
-        {status === "requested" || item.protocol ? <label className="exchange-protocol-field">Protocolo do fornecedor<input maxLength={120} onChange={(event) => setProtocol(event.target.value)} placeholder="Ex.: SAC-2026-1842" required={status === "requested"} value={protocol} /></label> : null}
-        {["collected", "sent", "completed"].includes(status) ? <div className="transaction-assurance exchange-movement-assurance"><span>↔</span><div><strong>Esta etapa movimenta o estoque</strong><small>A primeira confirmação de coleta ou envio fará a baixa rastreável do saldo reservado.</small></div></div> : null}
+        {completionAvailable && options.length ? <div className="exchange-mode-switch" role="tablist" aria-label="Tipo de atualização"><button aria-selected={mode === "progress"} className={mode === "progress" ? "active" : ""} onClick={() => { setMode("progress"); setError(""); }} role="tab" type="button">Andamento</button><button aria-selected={mode === "completion"} className={mode === "completion" ? "active" : ""} onClick={() => { setMode("completion"); setError(""); }} role="tab" type="button">Resultado final</button></div> : null}
+        {mode === "progress" ? <>
+          <div className="exchange-status-options" role="radiogroup" aria-label="Próxima etapa">
+            {options.map((option) => <label className={status === option.value ? "selected" : ""} key={option.value}><input checked={status === option.value} name="status" onChange={() => setStatus(option.value)} type="radio" value={option.value} /><span><strong>{option.label}</strong><small>{option.copy}</small></span></label>)}
+          </div>
+          {status === "requested" || item.protocol ? <label className="exchange-protocol-field">Protocolo do fornecedor<input maxLength={120} onChange={(event) => setProtocol(event.target.value)} placeholder="Ex.: SAC-2026-1842" required={status === "requested"} value={protocol} /></label> : null}
+          {["collected", "sent"].includes(status) ? <div className="transaction-assurance exchange-movement-assurance"><span>↔</span><div><strong>Esta etapa movimenta o estoque</strong><small>A primeira confirmação de coleta ou envio fará a baixa rastreável do saldo reservado.</small></div></div> : null}
+        </> : <>
+          <section className="exchange-completion-summary"><div><span>Solicitado</span><strong>{quantityFormat.format(item.quantity)} {item.unit}</strong></div><div><span>Aceito</span><strong>{quantityFormat.format(accepted)} {item.unit}</strong></div><div><span>Não aceito</span><strong>{quantityFormat.format(rejected)} {item.unit}</strong></div></section>
+          <div className="exchange-panel-fields exchange-completion-fields">
+            <label>Quantidade aceita ({item.unit})<input inputMode="decimal" max={item.quantity} min="0.001" onChange={(event) => setAcceptedQuantity(event.target.value)} required step="any" value={acceptedQuantity} /></label>
+          </div>
+          <div className="exchange-status-options exchange-outcome-options" role="radiogroup" aria-label="Compensação recebida">
+            {outcomeOptions.map((option) => <label className={outcome === option.value ? "selected" : ""} key={option.value}><input checked={outcome === option.value} name="outcome" onChange={() => setOutcome(option.value)} type="radio" value={option.value} /><span><strong>{option.label}</strong><small>{option.copy}</small></span></label>)}
+          </div>
+          <div className="exchange-panel-fields exchange-recovery-fields">
+            {outcome === "replacement" || outcome === "mixed" ? <><label>Quantidade reposta ({item.unit})<input inputMode="decimal" min="0" onChange={(event) => setReplacementQuantity(event.target.value)} required step="any" value={replacementQuantity} /></label><label>Valor unitário da reposição<input inputMode="decimal" min="0" onChange={(event) => setReplacementUnitValue(event.target.value)} required step="0.01" value={replacementUnitValue} /></label></> : null}
+            {outcome === "credit" || outcome === "mixed" ? <label>Crédito concedido (R$)<input inputMode="decimal" min="0.01" onChange={(event) => setCreditAmount(event.target.value)} required step="0.01" value={creditAmount} /></label> : null}
+            <label className="wide">Observações da conclusão<textarea maxLength={2000} name="resolutionNotes" placeholder="Ex.: crédito confirmado na fatura de agosto" rows={3} /></label>
+          </div>
+          <div className="exchange-value-preview"><span>Valor efetivamente recuperado</span><strong>{money.format(recovered)}</strong><small>{resolutionCalculationCopy(outcome, replacement, replacementValue, credit)}</small></div>
+          <label className="exchange-confirm"><input required type="checkbox" /><span><strong>Confirmo o resultado definitivo</strong><small>A conclusão encerra a reserva. Quantidades não aceitas retornam ao saldo quando já tiverem saído fisicamente.</small></span></label>
+        </>}
         {error ? <p className="form-feedback form-error" role="alert">{error}</p> : null}
-        <footer><button className="secondary-action" onClick={onClose} type="button">Voltar</button><button className="primary-action" disabled={loading || !status} type="submit">{loading ? "Atualizando..." : "Confirmar nova etapa →"}</button></footer>
+        <footer><button className="secondary-action" onClick={onClose} type="button">Voltar</button><button className="primary-action" disabled={loading || (mode === "progress" && !status)} type="submit">{loading ? (mode === "completion" ? "Concluindo..." : "Atualizando...") : mode === "completion" ? "Concluir troca →" : "Confirmar nova etapa →"}</button></footer>
       </form>
     </div>
   );
@@ -365,6 +424,10 @@ function nextStatuses(status: ExchangeRequestItem["status"]) {
   return options[status] ?? [];
 }
 
+function canComplete(status: ExchangeRequestItem["status"]) {
+  return ["accepted", "collected", "sent"].includes(status);
+}
+
 const requestStatusFilters = new Set(["preparation", "waiting", "approved", "closed"]);
 
 function requestStatusGroup(status: ExchangeRequestItem["status"]) {
@@ -406,6 +469,11 @@ function parseQuantity(value: string) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function parseNonNegativeNumber(value: string) {
+  const parsed = Number(value.trim().replace(",", "."));
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 function daysBetween(from: string, to: string) {
   return Math.round((new Date(`${to}T00:00:00Z`).getTime() - new Date(`${from}T00:00:00Z`).getTime()) / 86_400_000);
 }
@@ -418,6 +486,32 @@ function daysCopy(days: number) {
 
 function outcomeLabel(value: ExchangeAgreement["exchangeOutcome"]) {
   return ({ replacement: "reposição", credit: "crédito", either: "reposição ou crédito" } as const)[value];
+}
+
+function agreementOutcomeFromSnapshot(snapshot: Record<string, unknown>): ExchangeAgreement["exchangeOutcome"] {
+  const value = String(snapshot.exchangeOutcome ?? "either");
+  return value === "replacement" || value === "credit" ? value : "either";
+}
+
+function resolutionOutcomeOptions(agreement: ExchangeAgreement["exchangeOutcome"]) {
+  if (agreement === "replacement") return [{ value: "replacement" as const, label: "Reposição", copy: "O parceiro repôs os itens aceitos." }];
+  if (agreement === "credit") return [{ value: "credit" as const, label: "Crédito", copy: "O parceiro concedeu crédito financeiro." }];
+  return [
+    { value: "replacement" as const, label: "Reposição", copy: "O parceiro repôs os itens aceitos." },
+    { value: "credit" as const, label: "Crédito", copy: "O parceiro concedeu crédito financeiro." },
+    { value: "mixed" as const, label: "Reposição + crédito", copy: "A compensação combinou as duas modalidades." },
+  ];
+}
+
+function resolutionOutcomeLabel(value: NonNullable<ExchangeRequestItem["resolution"]>["outcome"]) {
+  return ({ replacement: "Reposição", credit: "Crédito", mixed: "Reposição + crédito" } as const)[value];
+}
+
+function resolutionCalculationCopy(outcome: "replacement" | "credit" | "mixed", replacement: number, unitValue: number, credit: number) {
+  const replacementCopy = `${quantityFormat.format(replacement)} × ${money.format(unitValue)}`;
+  if (outcome === "replacement") return replacementCopy;
+  if (outcome === "credit") return `Crédito de ${money.format(credit)}`;
+  return `${replacementCopy} + ${money.format(credit)} em crédito`;
 }
 
 function freightLabel(value: ExchangeAgreement["freightResponsibility"]) {

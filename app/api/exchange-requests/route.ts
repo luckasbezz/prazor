@@ -6,7 +6,7 @@ import { supabaseRpc } from "@/lib/supabase/rest";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const managerRoles = new Set(["owner", "admin", "manager"]);
-const statuses = new Set(["preparing", "requested", "accepted", "rejected", "collected", "sent", "completed", "cancelled"]);
+const statuses = new Set(["preparing", "requested", "accepted", "rejected", "collected", "sent", "cancelled"]);
 
 export async function POST(request: Request) {
   const session = await operationSession();

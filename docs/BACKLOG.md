@@ -72,6 +72,8 @@ Cada item só está concluído quando funciona no celular e desktop, respeita RL
 
 **Progresso em 25/08/2026 — trocas:** EXC-02 possui a primeira versão funcional. A central cruza lote, saldo por local, fornecedor e acordo vigente; identifica prazo ultrapassado, parceiro inativo, ausência de cobertura e quantidade já comprometida. A criação congela as condições negociadas, reserva logicamente o saldo em uma transação protegida contra concorrência e impede promessas acima da disponibilidade. O acompanhamento registra protocolo e transições válidas; coleta ou envio produz a baixa rastreável do estoque, enquanto cancelamento ou recusa libera a reserva. O próximo ciclo detalhará aceite parcial, crédito, reposição e valor efetivamente recuperado.
 
+**Progresso em 29/08/2026 — conclusão de trocas:** EXC-03 possui a primeira versão funcional. A conclusão registra aceite total ou parcial, quantidade não aceita, reposição, crédito ou compensação mista e calcula o valor efetivamente recuperado. A operação é atômica e idempotente: cria a resolução uma única vez, encerra a reserva, baixa apenas a quantidade aceita quando ainda não houve saída e devolve ao saldo a parte recusada quando o material já havia sido coletado ou enviado. Relatórios e histórico passam a usar o valor realizado, não o valor inicialmente solicitado.
+
 | ID | História | Prioridade | Critérios de aceite |
 |---|---|---:|---|
 | NOT-01 | Notificação no app | P0 | alertas são deduplicados, filtráveis e abrem a entidade correta |

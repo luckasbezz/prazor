@@ -28,6 +28,16 @@ export function operationErrorMessage(error: unknown) {
   if (message.includes("protocol required")) return "Informe o protocolo fornecido pelo parceiro para enviar a solicitação.";
   if (message.includes("invalid exchange protocol")) return "Informe um protocolo com até 120 caracteres.";
   if (message.includes("invalid exchange status transition")) return "Esta mudança de etapa não é permitida no fluxo da troca.";
+  if (message.includes("dedicated exchange completion")) return "Use a conclusão da troca para registrar aceite e compensação.";
+  if (message.includes("not ready for completion")) return "A troca precisa estar aceita, coletada ou enviada antes da conclusão.";
+  if (message.includes("already completed")) return "Esta troca já foi concluída e não pode ser registrada novamente.";
+  if (message.includes("invalid accepted exchange quantity")) return "A quantidade aceita deve ser maior que zero e não pode superar a quantidade solicitada.";
+  if (message.includes("replacement outcome requires")) return "Informe a quantidade e o valor unitário da reposição, sem crédito adicional.";
+  if (message.includes("credit outcome requires")) return "Informe o crédito financeiro concedido, sem quantidade de reposição.";
+  if (message.includes("mixed outcome requires")) return "A compensação mista exige reposição e crédito financeiro.";
+  if (message.includes("allows replacement only")) return "O acordo deste fornecedor permite somente reposição.";
+  if (message.includes("allows credit only")) return "O acordo deste fornecedor permite somente crédito.";
+  if (message.includes("exchange resolution notes too long")) return "As observações da conclusão devem ter até 2.000 caracteres.";
   if (message.includes("exchange request not found")) return "A solicitação de troca não foi encontrada no seu acesso.";
   if (message.includes("exchange notes too long")) return "As observações devem ter até 2.000 caracteres.";
   if (message.includes("quantity")) return "Informe uma quantidade maior que zero.";

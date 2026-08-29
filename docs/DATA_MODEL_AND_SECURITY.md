@@ -14,7 +14,7 @@ O projeto Supabase **Prazor Produção** já possui um modelo multiempresa amplo
 | Catálogo | `categories`, `brands`, `products`, `product_barcodes`, `suppliers` | existente |
 | Estoque | `batches`, `inventory_balances`, `inventory_movements` | existente |
 | Perdas | `loss_reasons`, `losses` | existente |
-| Fornecedores | `supplier_agreements`, `exchange_requests`, `exchange_request_items` | existente |
+| Fornecedores | `supplier_agreements`, `exchange_requests`, `exchange_request_items`, `exchange_request_resolutions` | existente |
 | Alertas | `notification_preferences`, `notifications`, `notification_deliveries` | existente |
 | Dados | `imports`, `import_errors`, `audit_logs` | existente |
 | Cobrança | planos, preços, clientes, assinaturas e eventos | existente |
@@ -110,6 +110,8 @@ Campos candidatos para `batches`:
 - data de abertura e validade após abertura somente nas verticais que exigirem.
 
 Campos novos só devem ser criados quando uma tela, regra ou integração do backlog for implementada.
+
+As conclusões de troca são imutáveis e passam exclusivamente por `complete_exchange_request`. A função valida empresa, papel, etapa, acordo e quantidades; impede conclusão duplicada; registra a compensação financeira; e concilia a parte não aceita com um movimento de retorno quando o saldo já tiver sido baixado.
 
 ## 5. Modelo de autorização
 

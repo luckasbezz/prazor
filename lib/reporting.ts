@@ -53,6 +53,7 @@ type ReasonRow = { id: string; name: string };
 type MovementRow = { id: string; movement_type: string; quantity: number | string; from_location_id: string | null; to_location_id: string | null; created_at: string };
 type ExchangeRow = { id: string; status: string; completed_at: string | null; created_at: string };
 type ExchangeLineRow = { exchange_request_id: string; stock_location_id: string | null; total_value: number | string | null };
+type ExchangeResolutionRow = { exchange_request_id: string; recovered_value: number | string; created_at: string };
 
 const riskStatuses = new Set<ReportInventoryRow["status"]>(["expired", "today", "critical", "attention"]);
 
@@ -68,7 +69,7 @@ export async function loadInventoryReport({
   branchId: string;
 }): Promise<InventoryReportSnapshot> {
   const encodedCompanyId = encodeURIComponent(companyId);
-  const [products, batches, expiryRows, balances, locations, branches, losses, reasons, movementRows, exchangeRows, exchangeLines] = await Promise.all([
+  const [products, batches, expiryRows, balances, locations, branches, losses, reasons, movementRows, exchangeRows, exchangeLines, exchangeResolutions] = await Promise.all([
     supabaseRest<ProductRow[]>(`products?select=id,name,sku,unit,cost_price&company_id=eq.${encodedCompanyId}&limit=3000`, accessToken),
     supabaseRest<BatchRow[]>(`batches?select=id,product_id,batch_code,expiration_date,cost_price&company_id=eq.${encodedCompanyId}&limit=5000`, accessToken),
     supabaseRest<ExpiryRow[]>(`v_batch_expiry?select=batch_id,expiry_status&company_id=eq.${encodedCompanyId}&quantity=gt.0&limit=5000`, accessToken),
@@ -80,6 +81,7 @@ export async function loadInventoryReport({
     supabaseRest<MovementRow[]>(`inventory_movements?select=id,movement_type,quantity,from_location_id,to_location_id,created_at&company_id=eq.${encodedCompanyId}&order=created_at.desc&limit=8000`, accessToken),
     supabaseRest<ExchangeRow[]>(`exchange_requests?select=id,status,completed_at,created_at&company_id=eq.${encodedCompanyId}&order=created_at.desc&limit=5000`, accessToken),
     supabaseRest<ExchangeLineRow[]>(`exchange_request_items?select=exchange_request_id,stock_location_id,total_value&company_id=eq.${encodedCompanyId}&limit=8000`, accessToken),
+    supabaseRest<ExchangeResolutionRow[]>(`exchange_request_resolutions?select=exchange_request_id,recovered_value,created_at&company_id=eq.${encodedCompanyId}&limit=5000`, accessToken),
   ]);
 
   const productById = new Map(products.map((item) => [item.id, item]));
@@ -128,10 +130,12 @@ export async function loadInventoryReport({
     return branchMatch && dateMatches(item.created_at);
   });
   const exchangeById = new Map(exchangeRows.map((item) => [item.id, item]));
+  const exchangeLineByRequestId = new Map(exchangeLines.map((item) => [item.exchange_request_id, item]));
   const filteredExchangeLines = exchangeLines.filter((line) => locationMatches(line.stock_location_id));
-  const recoveredLines = filteredExchangeLines.filter((line) => {
-    const request = exchangeById.get(line.exchange_request_id);
-    return request?.status === "completed" && dateMatches(request.completed_at ?? request.created_at);
+  const recoveredResolutions = exchangeResolutions.filter((resolution) => {
+    const request = exchangeById.get(resolution.exchange_request_id);
+    const line = exchangeLineByRequestId.get(resolution.exchange_request_id);
+    return Boolean(request?.status === "completed" && line && locationMatches(line.stock_location_id) && dateMatches(request.completed_at ?? resolution.created_at));
   });
   const openExchangeLines = filteredExchangeLines.filter((line) => {
     const status = exchangeById.get(line.exchange_request_id)?.status;
@@ -141,9 +145,9 @@ export async function loadInventoryReport({
   const inventoryValue = sum(inventoryRows.map((item) => item.inventoryValue));
   const riskValue = sum(inventoryRows.map((item) => item.riskValue));
   const lossValue = sum(filteredLosses.map((item) => Number(item.total_value ?? 0)));
-  const recoveredValue = sum(recoveredLines.map((item) => Number(item.total_value ?? 0)));
+  const recoveredValue = sum(recoveredResolutions.map((item) => Number(item.recovered_value ?? 0)));
   const resolvedValue = lossValue + recoveredValue;
-  const completedExchangeIds = new Set(recoveredLines.map((item) => item.exchange_request_id));
+  const completedExchangeIds = new Set(recoveredResolutions.map((item) => item.exchange_request_id));
   const criticalBatchIds = new Set(inventoryRows.filter((item) => ["expired", "today", "critical"].includes(item.status)).map((item) => item.id.split(":")[0]));
 
   const expiryDefinitions = [
@@ -212,7 +216,7 @@ export async function loadInventoryReport({
     };
   });
 
-  const trend = buildTrend(period, filteredLosses, recoveredLines, exchangeById);
+  const trend = buildTrend(period, filteredLosses, recoveredResolutions, exchangeById);
 
   return {
     period,
@@ -255,18 +259,18 @@ function periodCutoff(period: ReportPeriod) {
   return cutoff;
 }
 
-function buildTrend(period: ReportPeriod, losses: LossRow[], recoveredLines: ExchangeLineRow[], exchanges: Map<string, ExchangeRow>) {
+function buildTrend(period: ReportPeriod, losses: LossRow[], recoveredResolutions: ExchangeResolutionRow[], exchanges: Map<string, ExchangeRow>) {
   const bucketCount = period === "30" ? 5 : period === "90" ? 3 : period === "180" ? 6 : 12;
   const buckets = period === "30" ? weeklyBuckets(bucketCount) : monthlyBuckets(bucketCount);
   for (const loss of losses) {
     const bucket = buckets.find((item) => isWithin(new Date(loss.created_at), item.start, item.end));
     if (bucket) bucket.loss += Number(loss.total_value ?? 0);
   }
-  for (const line of recoveredLines) {
-    const request = exchanges.get(line.exchange_request_id);
-    const date = request ? new Date(request.completed_at ?? request.created_at) : null;
+  for (const resolution of recoveredResolutions) {
+    const request = exchanges.get(resolution.exchange_request_id);
+    const date = request ? new Date(request.completed_at ?? resolution.created_at) : null;
     const bucket = date ? buckets.find((item) => isWithin(date, item.start, item.end)) : null;
-    if (bucket) bucket.recovered += Number(line.total_value ?? 0);
+    if (bucket) bucket.recovered += Number(resolution.recovered_value ?? 0);
   }
   const max = Math.max(0, ...buckets.flatMap((item) => [item.loss, item.recovered]));
   return buckets.map((item) => ({
